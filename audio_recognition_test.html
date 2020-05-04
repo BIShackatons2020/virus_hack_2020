@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!-- saved from url=(0029)https://ivantsovy.ru/recoder/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  <title>Record Audio Test</title>
+</head>
+
+<body>
+  <h1>Audio Recognition Test</h1>
+  <p>Recording ... </p>
+  <button onclick="recordStop()" id="record-stop-button">Record</button>
+  <button onclick="playAudio()" id="play-audio-button">Play</button>
+  <div>
+    <textarea id="audio" style="width: 600px; height: 300px;"></textarea>
+    <textarea id="audio_text" style="width: 600px; height: 300px;"></textarea>
+  </div>
+  <script>
+    const recordAudio = () =>
+      new Promise(async resolve => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const audioChunks = [];
+
+        mediaRecorder.addEventListener("dataavailable", event => {
+          audioChunks.push(event.data);
+        });
+
+        const start = () => mediaRecorder.start();
+
+        const stop = () =>
+          new Promise(resolve => {
+            mediaRecorder.addEventListener("stop", () => {
+              const audioBlob = new Blob(audioChunks, { 'type' : 'audio/ogg; codecs=opus' });
+              window.ans = audioBlob;
+              const audioUrl = URL.createObjectURL(audioBlob);
+              const audio = new Audio(audioUrl);
+              const play = () => audio.play();
+              resolve({ audioBlob, audioUrl, play });
+            });
+
+            mediaRecorder.stop();
+          });
+
+        resolve({ start, stop });
+      });
+
+    let recorder = null;
+    let audio = null;
+
+    const recordStop = async () => {
+      if (recorder) {
+        audio = await recorder.stop();
+        recorder = null;
+        document.querySelector("#record-stop-button").textContent = "Record";
+        document.querySelector("#play-audio-button").removeAttribute("disabled");
+        getBase64();
+      } else {
+        recorder = await recordAudio();
+        document.getElementById('audio').textContent = '';
+        recorder.start();
+        document.querySelector("#record-stop-button").textContent = "Stop";
+      }
+    };
+
+    const playAudio = () => {
+      if (audio && typeof audio.play === "function") {
+        audio.play();
+      }
+    };
+
+    const getBase64 = () => {
+      var reader = new FileReader();
+      reader.readAsDataURL(ans);
+      reader.onloadend = function () {
+        base64 = reader.result;
+        base64 = base64.split(',')[1];
+        document.getElementById('audio').textContent = base64;
+
+	var xhr = new XMLHttpRequest();
+	var url = "http://localhost:8888/recognize";
+	xhr.open("POST", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	xhr.onreadystatechange = function () {
+	    if (xhr.readyState === 4 && xhr.status === 200) {
+	        var json = JSON.parse(xhr.responseText);
+                document.getElementById('audio_text').textContent = json.message;
+	    }
+	};
+	var data = JSON.stringify({"audio": base64 });
+	xhr.send(data);
+
+      }
+    }
+  </script>
+
+
+</body></html>
