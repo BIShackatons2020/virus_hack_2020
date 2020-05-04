@@ -8,6 +8,8 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
+import text_analyzer
+
 FOLDER_ID = ""
 IAM_TOKEN = ""
 RAW_AUDIO_FOLDER = "./audios/webm/"
@@ -60,6 +62,14 @@ def recognize_audio():
         result_message =  decodedData.get("result")
         print(result_message)
         return jsonify({"message":result_message})
+    
+@app.route('/analyze', methods=['POST'])
+def analyze_speach_text():
+    content = request.json
+    text = content["message"]
+    print(text)
+    result = text_analyzer.analyze(text)
+    return jsonify({"scores":result})
 
 if __name__ == "__main__":
     FOLDER_ID = os.environ['FOLDER_ID']

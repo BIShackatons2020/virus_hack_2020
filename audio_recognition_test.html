@@ -10,7 +10,7 @@
   <button onclick="recordStop()" id="record-stop-button">Record</button>
   <button onclick="playAudio()" id="play-audio-button">Play</button>
   <div>
-    <textarea id="audio" style="width: 600px; height: 300px;"></textarea>
+    <textarea id="audio" style="width: 600px; height: 300px;display: none;"></textarea>
     <textarea id="audio_text" style="width: 600px; height: 300px;"></textarea>
   </div>
   <script>
@@ -76,7 +76,7 @@
         document.getElementById('audio').textContent = base64;
 
 	var xhr = new XMLHttpRequest();
-	var url = "http://localhost:8888/recognize";
+	var url = "http://127.0.0.1:8888/recognize";
 	xhr.open("POST", url, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	xhr.onreadystatechange = function () {
