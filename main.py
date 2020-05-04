@@ -65,6 +65,9 @@ if __name__ == "__main__":
     FOLDER_ID = os.environ['FOLDER_ID']
     IAM_TOKEN = os.environ['IAM_TOKEN']
     
+    os.makedirs(RAW_AUDIO_FOLDER, exist_ok=True)
+    os.makedirs(NORMALIZED_AUDIO_FOLDER, exist_ok=True)
+
     print("Folder id: ", FOLDER_ID)
     print("I am token: ", IAM_TOKEN)
     
