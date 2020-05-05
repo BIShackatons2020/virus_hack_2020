@@ -40,16 +40,33 @@ LIMB = rule(
 )
 
 DISEASE = or_(
-    rule(LIMB.interpretation(
-        Disease.limb
-    ), LIMBSTATE.interpretation(
-        Disease.limbstate
-    )),
-    rule(LIMBSTATE.interpretation(
-        Disease.limbstate
-    ),LIMB.interpretation(
-        Disease.limb
-    )),
+    rule(
+        LIMB.interpretation(
+            Disease.limb
+        ), 
+        or_(
+            gram('ADVB'),
+            gram('PRTF'),
+            gram('PRED'),
+            gram('NPRO'),
+        ).repeatable(max=5).optional(),
+        LIMBSTATE.interpretation(
+            Disease.limbstate
+        )),
+    rule(
+        LIMBSTATE.interpretation(
+            Disease.limbstate
+        ),
+        or_(
+            gram('ADVB'),
+            gram('PRTF'),
+            gram('PRED'),
+            gram('NPRO'),
+        ).repeatable(max=5).optional(),
+        LIMB.interpretation(
+            Disease.limb
+        )
+    ),
 ).interpretation(
     Disease
 )
@@ -59,11 +76,13 @@ parser = Parser(DISEASE)
 LIMB_SCORE = {
     'сердце': 0.8,
     'голова': 0.7,
-    'колено': 0.3
+    'колено': 0.3,
+    'спин': 0.3,
 }
 
 LIMB_STATE_SCORE = {
     'прострелить': 0.8,
+    'болеть': 0.3,
 }
 
 # возвращает карту вида ключевое слово - его критический "счет"
@@ -86,3 +105,5 @@ def analyze(str):
             limbstate_score = LIMB_STATE_SCORE[normalized]
         scores[limb_state] = limbstate_score
     return scores
+
+

@@ -69,7 +69,14 @@ def analyze_speach_text():
     text = content["message"]
     print(text)
     result = text_analyzer.analyze(text)
-    return jsonify({"scores":result})
+    s = 0
+    for word, score in result.items():
+        text = text.replace(word, "<mark>"+word+"</mark>")
+        s += score
+    critical = False
+    if s > 0.7:
+        critical = True
+    return jsonify({"scores":result, "critical": critical, "text": text})
 
 if __name__ == "__main__":
     FOLDER_ID = os.environ['FOLDER_ID']
